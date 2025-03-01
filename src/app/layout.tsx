@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Navbar from "@/components/Navbar";
+import Sidebar from "@/components/Sidebar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,9 +30,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -40,21 +39,17 @@ export default function RootLayout({
           >
             <div className="min-h-screen">
               <Navbar />
+
               <main className="py-8">
-                {/* Center content */}
+                {/* center content */}
                 <div className="max-w-7xl mx-auto px-4">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div className="hidden lg:block lg:col-span-3">
-                      sidebar
+                      <Sidebar />
                     </div>
-                    <div className="lg:col-span-9">
-
-                    </div>
-
+                    <div className="lg:col-span-9">{children}</div>
                   </div>
-
                 </div>
-                {children}
               </main>
             </div>
           </ThemeProvider>
