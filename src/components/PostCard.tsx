@@ -28,6 +28,9 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
   const [optimisticLikes, setOptmisticLikes] = useState(post._count.likes);
   const [showComments, setShowComments] = useState(false);
 
+  console.log("dbUserId: ", dbUserId);
+  console.log("post.authorId: ", post.author.id);
+
   const handleLike = async () => {
     if (isLiking) return;
     try {

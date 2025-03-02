@@ -204,7 +204,7 @@ export async function toggleLike(postId: string) {
         where: { id: postId },
       });
   
-      revalidatePath("/"); // purge the cache
+      revalidatePath("/");
       return { success: true };
     } catch (error) {
       console.error("Failed to delete post:", error);
