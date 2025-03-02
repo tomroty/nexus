@@ -141,4 +141,4 @@ function NotificationsPage() {
   );
 }
 
-export default Notifications;
+export default NotificationsPage;
