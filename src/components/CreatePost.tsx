@@ -9,6 +9,7 @@ import { ImageIcon, Loader2Icon, SendIcon } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { createPost } from "@/actions/post.action";
 import toast from "react-hot-toast";
+import ImageUpload from "./ImageUpload";
 
 function CreatePost() {
   const { user } = useUser();
@@ -22,7 +23,7 @@ function CreatePost() {
     setIsPosting(true);
     try {
       const result = await createPost(content, imageUrl);
-      if (result.success){
+      if (result && result.success){
         // Reset form
         setContent("");
         setImageUrl("");
@@ -53,6 +54,19 @@ function CreatePost() {
               disabled={isPosting}
             />
           </div>
+
+          {(showImageUpload || imageUrl) && (
+            <div className="border rounded-lg p-4">
+              <ImageUpload
+                endpoint="imageUploader"
+                value={imageUrl}
+                onChange={(url) => {
+                  setImageUrl(url);
+                  if (!url) setShowImageUpload(false);
+                }}
+              />
+            </div>
+          )}
 
           <div className="flex items-center justify-between border-t pt-4">
             <div className="flex space-x-2">
