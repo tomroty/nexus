@@ -211,3 +211,28 @@ export async function toggleLike(postId: string) {
       return { success: false, error: "Failed to delete post" };
     }
   }
+
+export async function deleteComment(commentId: string) {
+  try {
+    const userId = await getDbUserId();
+    if (!userId) return { success: false, error: "Not authenticated" };
+
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId },
+      select: { authorId: true, postId: true },
+    });
+
+    if (!comment) return { success: false, error: "Comment not found" };
+    if (comment.authorId !== userId) return { success: false, error: "Not authorized to delete this comment" };
+
+    await prisma.comment.delete({
+      where: { id: commentId },
+    });
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete comment:", error);
+    return { success: false, error: "Failed to delete comment" };
+  }
+}

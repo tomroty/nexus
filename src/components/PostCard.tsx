@@ -1,6 +1,6 @@
 "use client";
 
-import { createComment, deletePost, getPosts, toggleLike } from "@/actions/post.action";
+import { createComment, deleteComment, deletePost, getPosts, toggleLike } from "@/actions/post.action";
 import { SignInButton, useUser } from "@clerk/nextjs";
 import React, { use, useState } from "react";
 import toast from "react-hot-toast";
@@ -8,7 +8,7 @@ import { Card, CardContent } from "./ui/card";
 import Link from "next/link";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { HeartIcon, LogInIcon, MessageCircleIcon, SendIcon } from "lucide-react";
+import { HeartIcon, LogInIcon, MessageCircleIcon, SendIcon, Trash2Icon } from "lucide-react";
 import {formatDistanceToNow} from "date-fns";
 import { Textarea } from "./ui/textarea";
 import { DeleteAlertDialog } from "./DeleteAlertDialog";
@@ -27,6 +27,7 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
   );
   const [optimisticLikes, setOptmisticLikes] = useState(post._count.likes);
   const [showComments, setShowComments] = useState(false);
+  const [isDeletingComment, setIsDeletingComment] = useState<string | null>(null);
 
   console.log("dbUserId: ", dbUserId);
   console.log("post.authorId: ", post.author.id);
@@ -73,6 +74,20 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
         toast.error("Failed to delete post");
       } finally {
         setIsDeleting(false);
+      }
+    };
+
+    const handleDeleteComment = async (commentId: string) => {
+      if (isDeletingComment) return;
+      try {
+        setIsDeletingComment(commentId);
+        const result = await deleteComment(commentId);
+        if (result.success) toast.success("Comment deleted successfully");
+        else throw new Error(result.error);
+      } catch (error) {
+        toast.error("Failed to delete comment");
+      } finally {
+        setIsDeletingComment(null);
       }
     };
 
@@ -170,15 +185,29 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
                       <AvatarImage src={comment.author.image ?? "/avatar.png"} />
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span className="font-medium text-sm">{comment.author.name}</span>
-                        <span className="text-sm text-muted-foreground">
-                          @{comment.author.username}
-                        </span>
-                        <span className="text-sm text-muted-foreground">·</span>
-                        <span className="text-sm text-muted-foreground">
-                          {formatDistanceToNow(new Date(comment.createdAt))} ago
-                        </span>
+                      <div className="flex flex-wrap items-center justify-between">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="font-medium text-sm">{comment.author.name}</span>
+                          <span className="text-sm text-muted-foreground">
+                            @{comment.author.username}
+                          </span>
+                          <span className="text-sm text-muted-foreground">·</span>
+                          <span className="text-sm text-muted-foreground">
+                            {formatDistanceToNow(new Date(comment.createdAt))} ago
+                          </span>
+                        </div>
+                        {dbUserId === comment.author.id && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleDeleteComment(comment.id)}
+                            disabled={isDeletingComment === comment.id}
+                          >
+                            <Trash2Icon className="size-3" />
+                            <span className="sr-only">Delete comment</span>
+                          </Button>
+                        )}
                       </div>
                       <p className="text-sm break-words">{comment.content}</p>
                     </div>
